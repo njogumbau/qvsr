@@ -11,7 +11,9 @@ This is a configurable quadratic voting app for oTree.
 ## Installation
 
 1.  [Download the `qvsr` app folder](https://github.com/njogumbau/qvsr/archive/refs/heads/main.zip).
-2.  Place the `qvsr` folder in the root directory of your oTree project.
+2.  Unzip the downloaded file. This will create a folder named `qvsr-main`.
+3.  Rename the `qvsr-main` folder to `qvsr`.
+4.  Place the `qvsr` folder in the root directory of your oTree project.
 
 ## Configuration
 
