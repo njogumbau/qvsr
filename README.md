@@ -4,7 +4,7 @@
 
 ## Citation
 
-Mbau, N., & Chen, D. L. (2025). *oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research* [Computer software].
+Mbau, N., & Chen, D. L. (2025). *oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research*
 
 ## Academic Paper
 
