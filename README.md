@@ -2,7 +2,7 @@
 
 ## Citation
 
-Mbau, N. (2025). *oTree: Quadtratic Voting Survey Research (QVSR)* [Computer software].
+Mbau, N. (2025). *oTree: Quadratic Voting Survey Research (QVSR)*.
 
 # oTree Quadratic Voting App
 
