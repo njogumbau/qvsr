@@ -1,8 +1,14 @@
-# oTree: Quadtratic Voting Survey Research(QVSR)
+# oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research
+
+- **Authors:** Njogu Mbau, Daniel L. Chen
 
 ## Citation
 
-Mbau, N. (2025). *oTree: Quadratic Voting Survey Research (QVSR)*.
+Mbau, N., & Chen, D. L. (2025). *oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research* [Computer software].
+
+## Academic Paper
+
+This app is described in the paper "oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research" by Njogu Mbau and Daniel L. Chen, intended for publication in the *Journal of Behavioral and Experimental Finance*.
 
 # oTree Quadratic Voting App
 
