@@ -1,0 +1,33 @@
+{{ block title }}
+    Voting Results
+{{ endblock }}
+
+{{ block content }}
+    <p>
+        Thank you for your participation! Here are the results of your voting:
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Option</th>
+                <th>Votes</th>
+                <th>Quadratic Votes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in vote_data %}
+            <tr>
+                <td>{{ item.option }}</td>
+                <td>{{ item.votes }}</td>
+                <td>{{ item.quadratic_votes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p>
+        Total votes cast: {{ player.total_votes }}
+    </p>
+
+{{ endblock }}

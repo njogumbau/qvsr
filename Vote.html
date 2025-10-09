@@ -1,0 +1,166 @@
+{{ block title }}
+    Quadratic Voting
+{{ endblock }}
+{{ block content }}
+
+    <style>
+        .option-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .thumb-button {
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .credit-display-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .vote-value {
+            font-size: 14px;
+            color: #555;
+            margin-left: 10px;
+            min-width: 100px;
+        }
+
+        .progress-container {
+            margin-top: 25px;
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 22px;
+            background-color: #4caf50;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+    </style>
+
+    <div>
+        <h5>You have <span id="remaining">{{ total_votes }}</span> vote credits remaining.</h5>
+
+        {% for option in options %}
+        <div class="option-container">
+            <span>{{ option }}</span>
+            <span class="thumb-button" onclick="changeValue('{{ option }}', -1)">👎</span>
+            <span class="credit-display-circle" id="val_{{ option }}">0</span>
+            <span class="thumb-button" onclick="changeValue('{{ option }}', 1)">👍</span>
+        </div>
+        {% endfor %}
+
+        <input type="hidden" id="id_votes" name="votes" value="">
+
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar">{{ total_votes }} left</div>
+        </div>
+
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+    const maxVoteCredits = {{ total_votes }};
+    const options = {{ options|json }};
+    let votes = {};
+
+    options.forEach(option => {
+        votes[option] = 0;
+    });
+
+    function updateUI() {
+        let totalCost = 0;
+
+        options.forEach(id => {
+            const val = votes[id] || 0;
+            const cost = val * val;
+            totalCost += cost;
+
+            document.getElementById('val_' + id).textContent = cost;
+        });
+
+        const remaining = maxVoteCredits - totalCost;
+        const bar = document.getElementById('progress-bar');
+        document.getElementById('remaining').textContent = remaining;
+
+        const pct = Math.max(0, Math.min(100, (remaining / maxVoteCredits) * 100));
+        bar.style.width = pct + '%';
+        bar.textContent = `${remaining} left`;
+
+        const errorBox = document.getElementById('error');
+        if (remaining < 0) {
+            errorBox.textContent = `You have exceeded your ${maxVoteCredits} vote-credit budget!`;
+        } else {
+            errorBox.textContent = '';
+        }
+    }
+
+    function changeValue(optionId, delta) {
+        let current = votes[optionId] || 0;
+        const newVal = current + delta;
+        if (newVal < 0) return;
+
+        const newTotal = getTotalCostWithChange(optionId, newVal);
+
+        if (newTotal > maxVoteCredits) {
+            document.getElementById('error').textContent = 'Not enough credits left for that change.';
+            return;
+        }
+
+        votes[optionId] = newVal;
+        document.getElementById('error').textContent = '';
+        updateUI();
+    }
+
+    function getTotalCostWithChange(changedId, newVal) {
+        let total = 0;
+
+        options.forEach(id => {
+            const val = (id === changedId)
+                ? newVal
+                : (votes[id] || 0);
+            total += val * val;
+        });
+
+        return total;
+    }
+
+    function setVotesBeforeSubmit() {
+        const votesInput = document.getElementById('id_votes');
+        votesInput.value = JSON.stringify(votes);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateUI();
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', setVotesBeforeSubmit);
+        }
+    });
+    </script>
+
+    {{ next_button }}
+
+{{ endblock }}
