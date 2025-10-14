@@ -1,150 +1,188 @@
 {{ block title }}
     Quadratic Voting
 {{ endblock }}
+
 {{ block content }}
 
-    <style>
-        .option-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+<style>
+    .option-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .thumb-button {
+        cursor: pointer;
+        font-size: 24px;
+        user-select: none;
+    }
+    .pill {
+        min-width: 48px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background-color: #f0f0f0;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .vote-value {
+        font-size: 14px;
+        color: #555;
+        min-width: 110px;
+    }
+    .progress-container {
+        margin-top: 16px;
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 22px;
+        background-color: #4caf50;
+        width: 100%;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+    }
+    .meta {
+        color: #666; font-size: 13px; margin-bottom: 6px;
+    }
+    .error {
+        color: red;
+        font-weight: bold;
+        margin-top: 12px;
+    }
+</style>
 
-        .thumb-button {
-            cursor: pointer;
-            font-size: 24px;
-        }
-
-        .credit-display-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #f0f0f0;
-            text-align: center;
-            line-height: 40px;
-            font-weight: bold;
-            font-size: 18px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .vote-value {
-            font-size: 14px;
-            color: #555;
-            margin-left: 10px;
-            min-width: 100px;
-        }
-
-        .progress-container {
-            margin-top: 25px;
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 22px;
-            background-color: #4caf50;
-            width: 100%;
-            text-align: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .error {
-            color: red;
-            font-weight: bold;
-            margin-top: 12px;
-        }
-    </style>
-
-    <div>
-        <h5>You have <span id="remaining">{{ total_votes }}</span> vote credits remaining.</h5>
-
-        {% for option in options %}
-        <div class="option-container">
-            <span>{{ option }}</span>
-            <span class="thumb-button" onclick="changeValue('{{ option }}', -1)">👎</span>
-            <span class="credit-display-circle" id="val_{{ option }}">0</span>
-            <span class="thumb-button" onclick="changeValue('{{ option }}', 1)">👍</span>
+<div>
+    {% if feedback %}
+        <div class="meta">
+            Budget: <strong><span id="credits">{{ credits }}</span> credits</strong> ·
+            Cost function: <em>{{ cost_fn_name }}</em>
+            {% if allow_negative %} · Negatives allowed{% endif %}
         </div>
-        {% endfor %}
-
-        <input type="hidden" id="id_votes" name="votes" value="">
-
-        <div class="progress-container">
-            <div id="progress-bar" class="progress-bar">{{ total_votes }} left</div>
+        <h5>
+            Remaining credits: <span id="remaining">{{ credits }}</span>
+        </h5>
+    {% else %}
+        <div class="meta">
+            Cost function: <em>{{ cost_fn_name }}</em>
+            {% if allow_negative %} · Negatives allowed{% endif %}
         </div>
+    {% endif %}
 
-        <div id="error" class="error"></div>
+    {% for option in options %}
+    <div class="option-container">
+        <span>{{ option }}</span>
+        <span class="thumb-button" onclick="changeValue('{{ option }}', -1)">👎</span>
+        <span class="pill" id="val_{{ option }}">0</span>
+        <span class="thumb-button" onclick="changeValue('{{ option }}', 1)">👍</span>
+        <span class="vote-value" id="votes_{{ option }}">votes: 0</span>
     </div>
+    {% endfor %}
 
-    <script>
-    const maxVoteCredits = {{ total_votes }};
+    <!-- Hidden JSON payload -->
+    <input type="hidden" id="id_votes" name="votes" value="">
+
+    {% if feedback %}
+    <div class="progress-container">
+        <div id="progress-bar" class="progress-bar">{{ credits }} left</div>
+    </div>
+    {% endif %}
+
+    <div id="error" class="error"></div>
+</div>
+
+<script>
+    // Server-provided config
     const options = {{ options|json }};
-    let votes = {};
+    const credits = {{ credits }};
+    const allowNegative = {{ allow_negative|json }};
+    const feedbackEnabled = {{ feedback|json }};
 
-    options.forEach(option => {
-        votes[option] = 0;
-    });
+    // Local state: integer votes per option
+    const votes = {};
+    options.forEach(opt => votes[opt] = 0);
 
-    function updateUI() {
-        let totalCost = 0;
+    function costFn(v) {
+        // UI uses v^2 for live feedback. Server enforces the true cost function.
+        // Negative votes incur positive cost on the server; mirror that here.
+        const x = Number(v) || 0;
+        return x * x;
+    }
 
-        options.forEach(id => {
-            const val = votes[id] || 0;
-            const cost = val * val;
-            totalCost += cost;
-
-            document.getElementById('val_' + id).textContent = cost;
-        });
-
-        const remaining = maxVoteCredits - totalCost;
-        const bar = document.getElementById('progress-bar');
-        document.getElementById('remaining').textContent = remaining;
-
-        const pct = Math.max(0, Math.min(100, (remaining / maxVoteCredits) * 100));
-        bar.style.width = pct + '%';
-        bar.textContent = `${remaining} left`;
-
-        const errorBox = document.getElementById('error');
-        if (remaining < 0) {
-            errorBox.textContent = `You have exceeded your ${maxVoteCredits} vote-credit budget!`;
-        } else {
-            errorBox.textContent = '';
+    function totalCost(currentVotes = votes) {
+        let t = 0;
+        for (const opt of options) {
+            t += costFn(currentVotes[opt] || 0);
         }
+        return t;
     }
 
     function changeValue(optionId, delta) {
-        let current = votes[optionId] || 0;
-        const newVal = current + delta;
-        if (newVal < 0) return;
+        const current = Number(votes[optionId] || 0);
+        const next = current + delta;
 
-        const newTotal = getTotalCostWithChange(optionId, newVal);
-
-        if (newTotal > maxVoteCredits) {
-            document.getElementById('error').textContent = 'Not enough credits left for that change.';
+        if (!allowNegative && next < 0) {
+            // negatives not allowed
             return;
         }
 
-        votes[optionId] = newVal;
+        const trial = {...votes, [optionId]: next};
+        const newTotal = totalCost(trial);
+
+        // Soft guard: don’t exceed credits in UI. Server will recheck.
+        if (feedbackEnabled && newTotal > credits) {
+            document.getElementById('error').textContent =
+                'Not enough credits left for that change.';
+            return;
+        }
+
+        votes[optionId] = next;
         document.getElementById('error').textContent = '';
         updateUI();
     }
 
-    function getTotalCostWithChange(changedId, newVal) {
-        let total = 0;
+    function updateUI() {
+        let runningCost = 0;
 
-        options.forEach(id => {
-            const val = (id === changedId)
-                ? newVal
-                : (votes[id] || 0);
-            total += val * val;
-        });
+        for (const opt of options) {
+            const v = Number(votes[opt] || 0);
+            const c = costFn(v);
+            runningCost += c;
 
-        return total;
+            const valEl = document.getElementById('val_' + opt);
+            const votesEl = document.getElementById('votes_' + opt);
+            if (valEl) valEl.textContent = c;         // show per-option cost
+            if (votesEl) votesEl.textContent = `votes: ${v}`;
+        }
+
+        if (feedbackEnabled) {
+            const remaining = Math.max(0, credits - runningCost);
+            const remainingEl = document.getElementById('remaining');
+            if (remainingEl) remainingEl.textContent = remaining;
+
+            const bar = document.getElementById('progress-bar');
+            if (bar) {
+                const pct = credits > 0 ? Math.max(0, Math.min(100, (remaining / credits) * 100)) : 0;
+                bar.style.width = pct + '%';
+                bar.textContent = `${remaining} left`;
+            }
+
+            const errorBox = document.getElementById('error');
+            if (runningCost > credits) {
+                errorBox.textContent = `You have exceeded your ${credits} credit budget!`;
+            } else {
+                errorBox.textContent = '';
+            }
+        }
+
+        // Sync payload
+        const votesInput = document.getElementById('id_votes');
+        if (votesInput) votesInput.value = JSON.stringify(votes);
     }
 
     function setVotesBeforeSubmit() {
@@ -155,12 +193,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         updateUI();
         const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', setVotesBeforeSubmit);
-        }
+        if (form) form.addEventListener('submit', setVotesBeforeSubmit);
     });
-    </script>
+</script>
 
-    {{ next_button }}
+{{ next_button }}
 
 {{ endblock }}
