@@ -12,22 +12,29 @@
             <tr>
                 <th>Option</th>
                 <th>Votes</th>
-                <th>Quadratic Votes</th>
+                <th>Cost (Credits Used)</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in vote_data %}
+            {% for item in rows %}
             <tr>
                 <td>{{ item.option }}</td>
                 <td>{{ item.votes }}</td>
-                <td>{{ item.quadratic_votes }}</td>
+                <td>{{ item.cost }}</td>
             </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr style="font-weight: bold; border-top: 2px solid #dee2e6;">
+                <td>Total</td>
+                <td></td>
+                <td>{{ total_cost }}</td>
+            </tr>
+        </tfoot>
     </table>
 
     <p>
-        Total votes cast: {{ player.total_votes }}
+        Remaining credits: {{ remaining_credits }}
     </p>
 
 {{ endblock }}

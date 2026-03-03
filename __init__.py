@@ -17,9 +17,14 @@ def concave_pilot(v: int) -> float:
     # Example alternative
     return float((abs(v) ** 1.6))
 
+def linear_cost(v: int) -> float:
+    # Standard linear cost: |v|
+    return float(abs(v))
+
 COST_FUNCTIONS: Dict[str, Callable[[int], float]] = {
     "quadratic": quadratic_cost,
     "concave_pilot": concave_pilot,
+    "linear": linear_cost,
 }
 
 def _get_cost_fn(session):
@@ -57,6 +62,13 @@ class Player(BasePlayer):
     total_cost = models.FloatField(initial=0.0)
     remaining_credits = models.FloatField(initial=0.0)
 
+    # Config parameters recorded for data reference
+    credits_allocated = models.FloatField()
+    cost_fn_name = models.StringField()
+    allow_negative = models.BooleanField()
+    options_count = models.IntegerField()
+    feedback_enabled = models.BooleanField()
+
 
 # ---- Pages ------------------------------------------------------------------
 
@@ -67,21 +79,27 @@ class Vote(Page):
     @staticmethod
     def vars_for_template(player: Player):
         cfg = player.session.config
+        options = cfg.get("qvsr_options", ["Option 1", "Option 2"])
+        credits = cfg.get("qvsr_credits", 25)
+        allow_negative = cfg.get("qvsr_allow_negative", False)
+        feedback = cfg.get("qvsr_feedback", True)
+        cost_fn_name = cfg.get("qvsr_cost_fn", "quadratic")
+        if not isinstance(cost_fn_name, str):
+            cost_fn_name = "custom"
+
         return {
-            "options": cfg["qvsr_options"],
-            "credits": cfg["qvsr_credits"],
-            "allow_negative": cfg.get("qvsr_allow_negative", False),
-            "feedback": cfg.get("qvsr_feedback", True),
-            "cost_fn_name": cfg.get("qvsr_cost_fn", "quadratic")
-                if isinstance(cfg.get("qvsr_cost_fn"), str)
-                else "custom",
+            "options": options,
+            "credits": credits,
+            "allow_negative": allow_negative,
+            "feedback": feedback,
+            "cost_fn_name": cost_fn_name,
         }
 
     @staticmethod
     def error_message(player: Player, values):
         cfg = player.session.config
-        options = cfg["qvsr_options"]
-        credits = cfg["qvsr_credits"]
+        options = cfg.get("qvsr_options", ["Option 1", "Option 2"])
+        credits = cfg.get("qvsr_credits", 25)
         allow_negative = cfg.get("qvsr_allow_negative", False)
         cost_fn = _get_cost_fn(player.session)
 
@@ -116,9 +134,14 @@ class Vote(Page):
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
         cfg = player.session.config
-        options = cfg["qvsr_options"]
-        credits = float(cfg["qvsr_credits"])
+        options = cfg.get("qvsr_options", ["Option 1", "Option 2"])
+        credits = float(cfg.get("qvsr_credits", 25))
         cost_fn = _get_cost_fn(player.session)
+        cost_fn_name = cfg.get("qvsr_cost_fn", "quadratic")
+        if not isinstance(cost_fn_name, str):
+            cost_fn_name = "custom"
+        allow_negative = cfg.get("qvsr_allow_negative", False)
+        feedback = cfg.get("qvsr_feedback", True)
 
         votes = json.loads(player.votes)
         costs = {opt: float(cost_fn(int(votes.get(opt, 0)))) for opt in options}
@@ -130,12 +153,21 @@ class Vote(Page):
         player.total_cost = total_cost
         player.remaining_credits = remaining
 
+        # Record metadata
+        player.credits_allocated = credits
+        player.cost_fn_name = cost_fn_name
+        player.allow_negative = allow_negative
+        player.options_count = len(options)
+        player.feedback_enabled = feedback
+
+
+
 
 class Results(Page):
     @staticmethod
     def vars_for_template(player: Player):
         cfg = player.session.config
-        options = cfg["qvsr_options"]
+        options = cfg.get("qvsr_options", ["Option 1", "Option 2"])
 
         votes = json.loads(player.votes)
         costs = json.loads(player.costs)
@@ -145,13 +177,13 @@ class Results(Page):
             rows.append({
                 "option": opt,
                 "votes": int(votes.get(opt, 0)),
-                "cost": float(costs.get(opt, 0.0)),
+                "cost": f"{float(costs.get(opt, 0.0)):.2f}",
             })
 
         return {
             "rows": rows,
-            "total_cost": player.total_cost,
-            "remaining_credits": player.remaining_credits,
+            "total_cost": f"{player.total_cost:.2f}",
+            "remaining_credits": f"{player.remaining_credits:.2f}",
         }
 
 
