@@ -1,7 +1,7 @@
 # oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19063176.svg)](https://doi.org/10.5281/zenodo.19063176)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19063779.svg)](https://doi.org/10.5281/zenodo.19063779)
 
 - **Authors:** Njogu Mbau, Daniel L. Chen
 
@@ -21,7 +21,7 @@ Compared to building custom interfaces from scratch, oTree-QVSR offers a validat
 
 If you use this software in your research, please cite:
 
-Mbau, N., & Chen, D. L. (2025). *oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research*. [https://doi.org/10.5281/zenodo.19063176](https://doi.org/10.5281/zenodo.19063176)
+Mbau, N., & Chen, D. L. (2025). *oTree-QVSR: An Open-Source Application for Quadratic Voting Survey Research*. [https://doi.org/10.5281/zenodo.19063779](https://doi.org/10.5281/zenodo.19063779)
 
 ## Installation
 

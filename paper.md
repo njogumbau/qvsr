@@ -8,9 +8,9 @@ Njogu Mbau¹ and Daniel L. Chen²
 
 **Repository:** https://github.com/njogumbau/qvsr
 
-**Archive DOI:** https://doi.org/10.5281/zenodo.19063176
+**Archive DOI:** https://doi.org/10.5281/zenodo.19063779
 
-**Version:** v1.0.4
+**Version:** v1.0.5
 
 **License:** MIT License
 
