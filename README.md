@@ -24,9 +24,10 @@ Mbau, N., & Chen, D. L. (2025). *oTree-QVSR: An Open-Source Application for Quad
 
 ## Installation
 
-1.  [Download the `qvsr` app folder](https://github.com/njogumbau/qvsr/archive/refs/heads/main.zip).
+1.  Download the latest release from the [GitHub Releases page](https://github.com/njogumbau/qvsr/releases).
 2.  Unzip the downloaded file.
-3.  Place the `qvsr` folder in the root directory of your oTree project.
+3.  Rename the resulting folder (e.g., `qvsr-1.0.2`) to `qvsr`.
+4.  Place the `qvsr` folder in the root directory of your oTree project.
 
 ## Configuration
 
