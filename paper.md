@@ -8,6 +8,8 @@ Njogu Mbau¹ and Daniel L. Chen²
 
 **Repository:** https://github.com/njogumbau/qvsr
 
+**Archive DOI:** https://doi.org/10.5281/zenodo.19063176
+
 **Version:** v1.0
 
 **License:** MIT License
