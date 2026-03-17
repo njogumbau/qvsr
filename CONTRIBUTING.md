@@ -27,9 +27,10 @@ We're always looking to expand the capabilities of oTree-QVSR. If you have an id
 ## Development Setup
 
 To develop oTree-QVSR, you'll need a working oTree environment. 
-1. Install requirements: `pip install otree`.
+1. Install requirements: `pip install -r requirements.txt`.
 2. Clone the repo into an oTree project folder.
-3. Run the server: `otree devserver`.
+3. Run the tests: `otree test qvsr`.
+4. Run the server: `otree devserver`.
 
 ## Community Guidelines
 Please be respectful and constructive in all interactions. We aim to maintain a welcoming environment for all contributors.

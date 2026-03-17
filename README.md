@@ -55,6 +55,40 @@ SESSION_CONFIGS = [
 ]
 ```
 
+## Quick Start
+
+To see a demo of the QV interface:
+1. Ensure you have oTree installed: `pip install otree`.
+2. Create a new oTree project: `otree startproject my_project`.
+3. Copy the `qvsr` folder into `my_project/`.
+4. In `my_project/settings.py`, add the `qvsr_demo` configuration provided in the [Configuration](#configuration) section.
+5. Run the server: `otree devserver`.
+6. Open your browser to `http://localhost:8000` and start the demo.
+
+## Data Output
+
+oTree-QVSR records comprehensive data for each participant in the following fields:
+
+- **`votes`**: A JSON string mapping each option name to the number of votes cast (e.g., `{"Option A": 3, "Option B": -2}`).
+- **`costs`**: A JSON string mapping each option name to the total cost incurred for those votes (e.g., `{"Option A": 9.0, "Option B": 4.0}`).
+- **`total_cost`**: The sum of all costs across all options.
+- **`remaining_credits`**: The participant's remaining budget after voting.
+- **`credits_allocated`**, **`cost_fn_name`**, **`allow_negative`**: Metadata recording the session configuration used for that participant.
+
+## Testing
+
+The repository includes an automated test suite using oTree's `Bot` system. To run the tests:
+
+```bash
+otree test qvsr
+```
+
+The tests verify:
+1. Valid submission of votes within a budget.
+2. Correct cost calculation and credit deduction.
+3. Validation of negative votes (when disallowed).
+4. Rejection of submissions that exceed the credit limit.
+
 ## Community Guidelines
 
 ### How to Contribute
