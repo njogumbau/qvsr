@@ -1,0 +1,21 @@
+name: Paper
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  paper:
+    runs-on: ubuntu-latest
+    name: Paper
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Paper
+        uses: open-journals/paper-action@v2
+        with:
+          journal: joss
+          # By default it looks for paper.md in the root.
+          # Since your paper.md is in the root, we don't need to specify paper_path.
