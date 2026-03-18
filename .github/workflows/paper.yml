@@ -14,8 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build Paper
-        uses: open-journals/paper-action@v2
+        uses: openjournals/openjournals-draft-action@v1.0
         with:
           journal: joss
-          # By default it looks for paper.md in the root.
-          # Since your paper.md is in the root, we don't need to specify paper_path.
+          paper-path: paper.md
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper
+          path: paper.pdf
